@@ -173,7 +173,7 @@ const NGODashboard = () => {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Credit calculation: 100 mangroves = 1 carbon credit
+                    Credits calculated using AI scoring: YOLOv8 + NDVI + CO₂ estimation
                   </p>
                 </div>
 
@@ -275,6 +275,35 @@ const NGODashboard = () => {
                           <span className="ml-2 font-medium text-primary">{plantation.creditsEarned}</span>
                         </div>
                       </div>
+
+                      {plantation.ecoScore && (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground">EcoLedger Score</span>
+                            <Badge variant={plantation.ecoScore.classification === 'High' ? 'default' : 
+                              plantation.ecoScore.classification === 'Medium' ? 'secondary' : 'outline'}>
+                              {plantation.ecoScore.combined_score}/100 - {plantation.ecoScore.classification}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div className="text-center">
+                              <div className="text-muted-foreground">YOLOv8</div>
+                              <div className="font-medium">{plantation.ecoScore.model_scores.yolov8_score}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-muted-foreground">NDVI</div>
+                              <div className="font-medium">{plantation.ecoScore.model_scores.ndvi_score}</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-muted-foreground">CO₂</div>
+                              <div className="font-medium">{plantation.ecoScore.model_scores.co2_score}</div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground italic">
+                            {plantation.ecoScore.recommendation}
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="text-xs text-muted-foreground">
                         Submitted: {plantation.timestamp.toLocaleDateString()}

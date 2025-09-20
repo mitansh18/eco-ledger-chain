@@ -166,6 +166,42 @@ const AdminPanel = () => {
                         </div>
                       </div>
 
+                      {plantation.ecoScore && (
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-semibold">AI Analysis Results</h4>
+                            <Badge variant={plantation.ecoScore.classification === 'High' ? 'default' : 
+                              plantation.ecoScore.classification === 'Medium' ? 'secondary' : 'outline'}>
+                              {plantation.ecoScore.combined_score}/100 - {plantation.ecoScore.classification}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="text-center bg-background/50 rounded p-2">
+                              <div className="text-xs text-muted-foreground">YOLOv8 Detection</div>
+                              <div className="text-sm font-medium">{plantation.ecoScore.model_scores.yolov8_score}/100</div>
+                              <div className="text-xs text-muted-foreground">Environmental Impact</div>
+                            </div>
+                            <div className="text-center bg-background/50 rounded p-2">
+                              <div className="text-xs text-muted-foreground">NDVI Analysis</div>
+                              <div className="text-sm font-medium">{plantation.ecoScore.model_scores.ndvi_score}/100</div>
+                              <div className="text-xs text-muted-foreground">Vegetation Health</div>
+                            </div>
+                            <div className="text-center bg-background/50 rounded p-2">
+                              <div className="text-xs text-muted-foreground">CO₂ Estimation</div>
+                              <div className="text-sm font-medium">{plantation.ecoScore.model_scores.co2_score}/100</div>
+                              <div className="text-xs text-muted-foreground">Carbon Absorption</div>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-background/50 rounded p-2">
+                            <p className="text-xs text-muted-foreground">
+                              <strong>AI Recommendation:</strong> {plantation.ecoScore.recommendation}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="text-xs text-muted-foreground">
                         Submitted: {plantation.timestamp.toLocaleDateString()}
                       </div>
@@ -247,6 +283,19 @@ const AdminPanel = () => {
                           <span className="ml-2 font-medium text-primary">{plantation.creditsEarned}</span>
                         </div>
                       </div>
+
+                      {plantation.ecoScore && (
+                        <div className="bg-muted/30 rounded p-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">EcoLedger Score:</span>
+                            <Badge variant={plantation.ecoScore.classification === 'High' ? 'default' : 
+                              plantation.ecoScore.classification === 'Medium' ? 'secondary' : 'outline'}
+                              className="h-5">
+                              {plantation.ecoScore.combined_score}/100
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="text-xs text-muted-foreground">
                         Verified: {plantation.timestamp.toLocaleDateString()}

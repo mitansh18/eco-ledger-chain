@@ -147,6 +147,38 @@ const BuyerDashboard = () => {
                       </div>
                     </div>
 
+                    {credit.ecoScore && (
+                      <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-sm font-semibold text-muted-foreground">EcoLedger AI Verification</h4>
+                          <Badge variant={credit.ecoScore.classification === 'High' ? 'default' : 
+                            credit.ecoScore.classification === 'Medium' ? 'secondary' : 'outline'}
+                            className="font-medium">
+                            {credit.ecoScore.combined_score}/100 - {credit.ecoScore.classification} Impact
+                          </Badge>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-primary">{credit.ecoScore.model_scores.yolov8_score}</div>
+                            <div className="text-xs text-muted-foreground">Environmental<br/>Detection</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-success">{credit.ecoScore.model_scores.ndvi_score}</div>
+                            <div className="text-xs text-muted-foreground">Vegetation<br/>Health</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-secondary">{credit.ecoScore.model_scores.co2_score}</div>
+                            <div className="text-xs text-muted-foreground">CO₂ Absorption<br/>Potential</div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground bg-background/50 rounded p-2">
+                          <strong>AI Assessment:</strong> {credit.ecoScore.recommendation}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="text-xs text-muted-foreground">
                         Registered: {credit.timestamp.toLocaleDateString()}
