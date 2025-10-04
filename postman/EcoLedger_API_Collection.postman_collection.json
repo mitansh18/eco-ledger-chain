@@ -1,0 +1,499 @@
+{
+  "info": {
+    "name": "EcoLedger API Collection",
+    "description": "Complete API testing collection for EcoLedger carbon credit verification platform",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Health Checks",
+      "item": [
+        {
+          "name": "Tree Detection API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{tree_api_url}}/health",
+              "host": ["{{tree_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "NDVI API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ndvi_api_url}}/health",
+              "host": ["{{ndvi_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "IoT API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_api_url}}/health",
+              "host": ["{{iot_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "CO2 API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{co2_api_url}}/health",
+              "host": ["{{co2_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Final Score API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{final_score_api_url}}/health",
+              "host": ["{{final_score_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Blockchain API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{blockchain_api_url}}/health",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Complete Verification Flow",
+      "item": [
+        {
+          "name": "1. Tree Detection",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/sample_mangrove_image.jpg"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{tree_api_url}}/treecount",
+              "host": ["{{tree_api_url}}"],
+              "path": ["treecount"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains Tree_Count', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('Tree_Count');",
+                  "    pm.environment.set('tree_count', jsonData.Tree_Count);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. NDVI Analysis",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/sample_ndvi_image.jpg"
+                },
+                {
+                  "key": "multispectral",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{ndvi_api_url}}/ndvi",
+              "host": ["{{ndvi_api_url}}"],
+              "path": ["ndvi"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains NDVI_Score', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('NDVI_Score');",
+                  "    pm.environment.set('ndvi_score', jsonData.NDVI_Score);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Generate Synthetic IoT Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_api_url}}/iot/synthetic?readings=50&days=15",
+              "host": ["{{iot_api_url}}"],
+              "path": ["iot", "synthetic"],
+              "query": [
+                {
+                  "key": "readings",
+                  "value": "50"
+                },
+                {
+                  "key": "days", 
+                  "value": "15"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('synthetic_iot_data', JSON.stringify(jsonData.synthetic_data));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Process IoT Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{{synthetic_iot_data}}"
+            },
+            "url": {
+              "raw": "{{iot_api_url}}/iot",
+              "host": ["{{iot_api_url}}"],
+              "path": ["iot"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains IoT_Score', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('IoT_Score');",
+                  "    pm.environment.set('iot_score', jsonData.IoT_Score);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Calculate CO2 Absorption",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": {{tree_count}}\n}"
+            },
+            "url": {
+              "raw": "{{co2_api_url}}/co2/simple",
+              "host": ["{{co2_api_url}}"],
+              "path": ["co2", "simple"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains CO2_absorbed_kg', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('CO2_absorbed_kg');",
+                  "    pm.environment.set('co2_absorbed', jsonData.CO2_absorbed_kg);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Calculate Final Score",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": {{tree_count}},\n  \"Claimed_Trees\": 1000,\n  \"NDVI_Score\": {{ndvi_score}},\n  \"IoT_Score\": {{iot_score}},\n  \"Audit_Check\": 0.8\n}"
+            },
+            "url": {
+              "raw": "{{final_score_api_url}}/finalscore",
+              "host": ["{{final_score_api_url}}"],
+              "path": ["finalscore"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response contains Final_Score and Carbon_Credits', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('Final_Score');",
+                  "    pm.expect(jsonData).to.have.property('Carbon_Credits');",
+                  "    pm.environment.set('final_score', jsonData.Final_Score);",
+                  "    pm.environment.set('carbon_credits', jsonData.Carbon_Credits);",
+                  "    pm.environment.set('report_id', jsonData.Report_ID);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Submit to Blockchain",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"NGO_MANGROVE_001\",\n  \"project_id\": \"PROJ_2024_001\",\n  \"verification_data\": {\n    \"project_name\": \"Test Mangrove Project\",\n    \"Final_Score\": {{final_score}},\n    \"Carbon_Credits\": {{carbon_credits}},\n    \"Tree_Count\": {{tree_count}},\n    \"NDVI_Score\": {{ndvi_score}},\n    \"IoT_Score\": {{iot_score}}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/submit",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "submit"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Blockchain submission successful', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('report_id');",
+                  "    pm.environment.set('blockchain_report_id', jsonData.report_id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Issue Carbon Credits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"NGO_MANGROVE_001\",\n  \"report_id\": \"{{blockchain_report_id}}\",\n  \"amount\": {{carbon_credits}},\n  \"price_per_credit\": 25.0\n}"
+            },
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/issue",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "issue"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Credits issued successfully', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('credit_id');",
+                  "    pm.environment.set('credit_id', jsonData.credit_id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Blockchain Operations",
+      "item": [
+        {
+          "name": "Get Available Credits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/credits/available",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "credits", "available"]
+            }
+          }
+        },
+        {
+          "name": "Query Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/query/{{blockchain_report_id}}",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "query", "{{blockchain_report_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Transfer Credits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credit_id\": \"{{credit_id}}\",\n  \"from_ngo\": \"NGO_MANGROVE_001\",\n  \"to_company\": \"COMPANY_ABC_123\",\n  \"amount\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/transfer",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "transfer"]
+            }
+          }
+        },
+        {
+          "name": "Get Blockchain Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{blockchain_api_url}}/ledger/stats",
+              "host": ["{{blockchain_api_url}}"],
+              "path": ["ledger", "stats"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "tree_api_url",
+      "value": "http://localhost:5001"
+    },
+    {
+      "key": "ndvi_api_url", 
+      "value": "http://localhost:5002"
+    },
+    {
+      "key": "iot_api_url",
+      "value": "http://localhost:5003"
+    },
+    {
+      "key": "co2_api_url",
+      "value": "http://localhost:5004"
+    },
+    {
+      "key": "final_score_api_url",
+      "value": "http://localhost:5005"
+    },
+    {
+      "key": "blockchain_api_url",
+      "value": "http://localhost:5006"
+    }
+  ]
+}
