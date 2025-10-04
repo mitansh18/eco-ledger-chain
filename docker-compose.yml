@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # Dynamic Dataset API
+  dynamic-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/dynamic_dataset_api.py
+    ports:
+      - "5007:5007"
+    volumes:
+      - ./backend:/app
+      - ./test_data:/app/test_data
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # Tree Detection API
+  tree-detection-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/tree_detection_api.py
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend:/app
+      - ./test_data:/app/test_data
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # NDVI API
+  ndvi-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/ndvi_api.py
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./backend:/app
+      - ./test_data:/app/test_data
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # IoT API
+  iot-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/iot_api.py
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./backend:/app
+      - ./test_data:/app/test_data
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # CO2 API
+  co2-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/co2_api.py
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # Final Score API
+  final-score-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ai_apis/final_score_api.py
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # Blockchain Ledger API
+  blockchain-api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python ledger_service/blockchain_api.py
+    ports:
+      - "5006:5006"
+    volumes:
+      - ./backend:/app
+      - blockchain_data:/app/data
+    environment:
+      - FLASK_ENV=development
+    networks:
+      - ecoledger
+
+  # Frontend
+  frontend:
+    build: 
+      context: ./frontend_nextjs
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_TREE_API_URL=http://localhost:5001
+      - NEXT_PUBLIC_NDVI_API_URL=http://localhost:5002
+      - NEXT_PUBLIC_IOT_API_URL=http://localhost:5003
+      - NEXT_PUBLIC_CO2_API_URL=http://localhost:5004
+      - NEXT_PUBLIC_FINAL_SCORE_API_URL=http://localhost:5005
+      - NEXT_PUBLIC_BLOCKCHAIN_API_URL=http://localhost:5006
+    depends_on:
+      - dynamic-api
+      - tree-detection-api
+      - ndvi-api
+      - iot-api
+      - co2-api
+      - final-score-api
+      - blockchain-api
+    networks:
+      - ecoledger
+
+networks:
+  ecoledger:
+    driver: bridge
+
+volumes:
+  blockchain_data:

@@ -1,0 +1,26 @@
+# EcoLedger Backend Dependencies
+# Flask and web framework
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# AI/ML libraries
+ultralytics==8.0.196
+opencv-python==4.8.1.78
+numpy==1.24.3
+pillow==10.0.1
+matplotlib==3.7.2
+pandas==2.0.3
+
+# Image processing
+scikit-image==0.21.0
+
+# Database
+sqlite3
+
+# Utilities
+requests==2.31.0
+python-dateutil==2.8.2
+
+# Development
+pytest==7.4.2
+python-dotenv==1.0.0
