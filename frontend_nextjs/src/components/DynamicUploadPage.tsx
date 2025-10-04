@@ -21,7 +21,8 @@ import {
   FileSearch,
   BarChart3,
   Layers,
-  Activity
+  Activity,
+  Clock
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { EcoLedgerAPI, handleApiError } from '@/lib/api'
@@ -70,6 +71,11 @@ export default function DynamicUploadPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [selectedStrategy, setSelectedStrategy] = useState<string>('')
   const [availableStrategies, setAvailableStrategies] = useState<{ [key: string]: any }>({})
+  
+  // NGO Information
+  const [ngoId, setNgoId] = useState('')
+  const [projectId, setProjectId] = useState('')
+  const [projectName, setProjectName] = useState('')
 
   // Dynamic file dropzone - accepts any file type
   const dropzone = useDropzone({
@@ -146,10 +152,20 @@ export default function DynamicUploadPage() {
       return
     }
 
+    if (!ngoId.trim()) {
+      toast.error('Please provide NGO ID')
+      return
+    }
+
     try {
       setIsVerifying(true)
       const formData = new FormData()
       uploadedFiles.forEach(file => formData.append('files', file))
+      
+      // Add NGO information
+      formData.append('ngo_id', ngoId.trim())
+      if (projectId.trim()) formData.append('project_id', projectId.trim())
+      if (projectName.trim()) formData.append('project_name', projectName.trim())
       
       if (selectedStrategy) {
         formData.append('strategy', selectedStrategy)
@@ -167,7 +183,7 @@ export default function DynamicUploadPage() {
       const result = await response.json()
       setVerificationResult(result)
       
-      toast.success('Dataset verification completed!')
+      toast.success('Dataset verification submitted for admin review!')
     } catch (error) {
       toast.error(`Verification failed: ${handleApiError(error)}`)
     } finally {
@@ -241,6 +257,53 @@ export default function DynamicUploadPage() {
           <div className="flex items-center space-x-2 bg-orange-50 p-3 rounded-lg">
             <CheckCircle className="w-5 h-5 text-orange-600" />
             <span className="font-medium">Flexible Verification</span>
+          </div>
+        </div>
+      </div>
+
+      {/* NGO Information */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">NGO Project Information</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              NGO ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              className="input-field"
+              value={ngoId}
+              onChange={(e) => setNgoId(e.target.value)}
+              placeholder="e.g., NGO_MANGROVE_001"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Project ID
+            </label>
+            <input
+              type="text"
+              className="input-field"
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              placeholder="e.g., PROJ_2024_001"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Project Name
+            </label>
+            <input
+              type="text"
+              className="input-field"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="e.g., Sundarbans Restoration"
+            />
           </div>
         </div>
       </div>
@@ -422,40 +485,79 @@ export default function DynamicUploadPage() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center space-x-2 mb-6">
             <CheckCircle className="w-6 h-6 text-green-600" />
-            <h3 className="text-lg font-medium text-gray-900">Verification Results</h3>
+            <h3 className="text-lg font-medium text-gray-900">Verification Submitted Successfully</h3>
             <span className="text-sm text-gray-500">ID: {verificationResult.verification_id}</span>
           </div>
 
-          {/* Verification Summary */}
+          {/* Workflow Status */}
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+            <h4 className="font-medium text-blue-900 mb-2">Current Status: Pending Admin Review</h4>
+            <div className="space-y-2 text-sm text-blue-800">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>✅ NGO uploaded dataset</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>✅ AI verification completed</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-yellow-500" />
+                <span>⏳ Awaiting admin approval</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span>⏸️ Carbon credits will be issued upon approval</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span>⏸️ Verified data will appear in dashboard</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-gray-400" />
+                <span>⏸️ Credits will be available for company trading</span>
+              </div>
+            </div>
+            <div className="mt-3 text-sm text-blue-700">
+              <strong>Estimated Processing Time:</strong> {verificationResult.next_steps.estimated_processing_time}
+            </div>
+          </div>
+
+          {/* Project Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-indigo-50 p-4 rounded-lg">
-              <div className="text-sm font-medium text-indigo-900">Verification Type</div>
+              <div className="text-sm font-medium text-indigo-900">NGO Information</div>
               <div className="text-lg font-bold text-indigo-700">
+                {verificationResult.ngo_id}
+              </div>
+              {verificationResult.project_name && (
+                <div className="text-sm text-indigo-600">{verificationResult.project_name}</div>
+              )}
+            </div>
+            
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-green-900">AI Confidence</div>
+              <div className="text-2xl font-bold text-green-700">
+                {(verificationResult.verification_results.confidence_score * 100).toFixed(1)}%
+              </div>
+              <div className="text-sm text-green-600">
                 {verificationResult.verification_results.verification_type}
               </div>
             </div>
             
-            <div className={`p-4 rounded-lg ${getConfidenceColor(verificationResult.verification_results.confidence_score)}`}>
-              <div className="text-sm font-medium">Confidence Score</div>
-              <div className="text-2xl font-bold">
-                {(verificationResult.verification_results.confidence_score * 100).toFixed(1)}%
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="text-sm font-medium text-purple-900">Potential Credits</div>
+              <div className="text-2xl font-bold text-purple-700">
+                {verificationResult.potential_carbon_credits}
               </div>
-            </div>
-            
-            <div className={`p-4 rounded-lg ${verificationResult.next_steps.can_issue_credits ? 'bg-green-100' : 'bg-red-100'}`}>
-              <div className={`text-sm font-medium ${verificationResult.next_steps.can_issue_credits ? 'text-green-900' : 'text-red-900'}`}>
-                Credit Eligibility
-              </div>
-              <div className={`text-lg font-bold ${verificationResult.next_steps.can_issue_credits ? 'text-green-700' : 'text-red-700'}`}>
-                {verificationResult.next_steps.can_issue_credits ? 'Eligible' : 'Not Eligible'}
-              </div>
+              <div className="text-sm text-purple-600">Subject to admin approval</div>
             </div>
           </div>
 
           {/* Verification Metrics */}
           {Object.keys(verificationResult.verification_results.metrics).length > 0 && (
             <div className="mb-6">
-              <h4 className="font-medium text-gray-900 mb-3">Verification Metrics</h4>
+              <h4 className="font-medium text-gray-900 mb-3">AI Analysis Results</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {Object.entries(verificationResult.verification_results.metrics).map(([key, value]) => (
                   <div key={key} className="bg-gray-50 p-3 rounded-lg">
@@ -471,17 +573,29 @@ export default function DynamicUploadPage() {
             </div>
           )}
 
-          {/* Issues */}
-          {verificationResult.verification_results.issues.length > 0 && (
-            <div className="mb-6">
+          {/* Next Steps for NGO */}
+          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <h4 className="font-medium text-yellow-900 mb-2">What Happens Next?</h4>
+            <ul className="space-y-2 text-sm text-yellow-800">
+              <li>• Our admin team will review your submission within 24-48 hours</li>
+              <li>• You'll receive an email notification when the review is complete</li>
+              <li>• If approved, carbon credits will be automatically issued to your NGO account</li>
+              <li>• Credits will become available for trading in the marketplace</li>
+              <li>• You can track the status in the Dashboard</li>
+            </ul>
+          </div>
+
+          {/* Issues and Recommendations */}
+          {verificationResult.verification_results.issues?.length > 0 && (
+            <div className="mt-6">
               <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-orange-500" />
-                <span>Issues Identified</span>
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+                <span>Issues for Admin Review</span>
               </h4>
               <ul className="space-y-2">
                 {verificationResult.verification_results.issues.map((issue, index) => (
                   <li key={index} className="flex items-start space-x-2 text-sm text-orange-700 bg-orange-50 p-3 rounded">
-                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>{issue}</span>
                   </li>
                 ))}
@@ -489,33 +603,17 @@ export default function DynamicUploadPage() {
             </div>
           )}
 
-          {/* Recommendations */}
-          {verificationResult.verification_results.recommendations.length > 0 && (
-            <div className="mb-6">
+          {verificationResult.verification_results.recommendations?.length > 0 && (
+            <div className="mt-6">
               <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
                 <Lightbulb className="w-5 h-5 text-blue-500" />
-                <span>Recommendations</span>
+                <span>AI Recommendations</span>
               </h4>
               <ul className="space-y-2">
                 {verificationResult.verification_results.recommendations.map((recommendation, index) => (
                   <li key={index} className="flex items-start space-x-2 text-sm text-blue-700 bg-blue-50 p-3 rounded">
                     <Lightbulb className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>{recommendation}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Next Steps */}
-          {verificationResult.next_steps.recommended_actions.length > 0 && (
-            <div>
-              <h4 className="font-medium text-gray-900 mb-3">Next Steps</h4>
-              <ul className="space-y-2">
-                {verificationResult.next_steps.recommended_actions.map((action, index) => (
-                  <li key={index} className="flex items-start space-x-2 text-sm text-gray-700">
-                    <CheckCircle className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-                    <span>{action}</span>
                   </li>
                 ))}
               </ul>

@@ -11,10 +11,12 @@ import {
   Menu,
   X,
   TreePine,
-  FileText
+  FileText,
+  Shield
 } from 'lucide-react'
 import UploadPage from '@/components/UploadPage'
 import DynamicUploadPage from '@/components/DynamicUploadPage'
+import AdminPanel from '@/components/AdminPanel'
 import Dashboard from '@/components/Dashboard'
 import Marketplace from '@/components/Marketplace'
 
@@ -25,6 +27,7 @@ export default function Home() {
   const tabs = [
     { id: 'dynamic', name: 'Smart Dataset Upload', icon: Upload, description: 'Upload any dataset for intelligent verification' },
     { id: 'upload', name: 'Standard Upload', icon: FileText, description: 'Traditional mangrove project submission' },
+    { id: 'admin', name: 'Admin Panel', icon: Shield, description: 'Review and approve verifications' },
     { id: 'dashboard', name: 'Verification Dashboard', icon: BarChart3, description: 'View verification results and scores' },
     { id: 'marketplace', name: 'Carbon Credits Marketplace', icon: ShoppingCart, description: 'Trade verified carbon credits' },
   ]
@@ -35,6 +38,8 @@ export default function Home() {
         return <DynamicUploadPage />
       case 'upload':
         return <UploadPage />
+      case 'admin':
+        return <AdminPanel />
       case 'dashboard':
         return <Dashboard />
       case 'marketplace':

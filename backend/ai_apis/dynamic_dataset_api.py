@@ -56,6 +56,9 @@ class DynamicDatasetProcessor:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS verifications (
                     verification_id TEXT PRIMARY KEY,
+                    ngo_id TEXT,
+                    project_id TEXT,
+                    project_name TEXT,
                     dataset_name TEXT,
                     dataset_type TEXT,
                     file_count INTEGER,
@@ -64,6 +67,11 @@ class DynamicDatasetProcessor:
                     confidence_score REAL,
                     verification_results TEXT,
                     recommendations TEXT,
+                    status TEXT DEFAULT 'pending_admin_review',
+                    admin_notes TEXT,
+                    admin_reviewed_by TEXT,
+                    admin_reviewed_at TEXT,
+                    credits_issued REAL DEFAULT 0,
                     created_at TEXT
                 )
             ''')
@@ -248,7 +256,7 @@ class DynamicDatasetProcessor:
         
         return content_indicators
     
-    def process_dataset(self, files, strategy=None):
+    def process_dataset(self, files, ngo_id=None, project_id=None, project_name=None, strategy=None):
         """Process the dataset using the determined or specified strategy"""
         # First analyze the dataset
         analysis = self.analyze_dataset(files)
@@ -262,11 +270,23 @@ class DynamicDatasetProcessor:
         else:
             verification_results = self._generic_verification(files, analysis)
         
+        # Calculate potential carbon credits (not issued until admin approval)
+        potential_credits = 0
+        if 'estimated_carbon_sequestration_kg' in verification_results['metrics']:
+            potential_credits = verification_results['metrics']['estimated_carbon_sequestration_kg'] / 1000
+        elif 'estimated_total_trees' in verification_results['metrics']:
+            potential_credits = (verification_results['metrics']['estimated_total_trees'] * 12.3) / 1000 * verification_results['confidence_score']
+        
         # Combine analysis and verification results
         results = {
             'dataset_analysis': analysis,
             'verification_strategy': verification_strategy,
             'verification_results': verification_results,
+            'ngo_id': ngo_id,
+            'project_id': project_id,
+            'project_name': project_name,
+            'potential_carbon_credits': round(potential_credits, 3),
+            'status': 'pending_admin_review',
             'timestamp': datetime.now().isoformat(),
             'verification_id': f"VER_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(str(files)) % 10000}"
         }
@@ -609,12 +629,15 @@ class DynamicDatasetProcessor:
                 cursor = conn.cursor()
                 cursor.execute('''
                     INSERT INTO verifications 
-                    (verification_id, dataset_name, dataset_type, file_count, total_size_mb, 
-                     verification_strategy, confidence_score, verification_results, 
-                     recommendations, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (verification_id, ngo_id, project_id, project_name, dataset_name, dataset_type, 
+                     file_count, total_size_mb, verification_strategy, confidence_score, 
+                     verification_results, recommendations, status, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     results['verification_id'],
+                    results.get('ngo_id'),
+                    results.get('project_id'),
+                    results.get('project_name'),
                     f"Dataset_{results['verification_id']}",
                     results['dataset_analysis']['dataset_type'],
                     results['dataset_analysis']['total_files'],
@@ -623,6 +646,7 @@ class DynamicDatasetProcessor:
                     results['verification_results']['confidence_score'],
                     json.dumps(results['verification_results']),
                     json.dumps(results['verification_results'].get('recommendations', [])),
+                    results.get('status', 'pending_admin_review'),
                     results['timestamp']
                 ))
                 conn.commit()
@@ -692,11 +716,20 @@ def verify_dataset():
                 "error": "No files selected"
             }), 400
         
-        # Get optional strategy override
+        # Get NGO information and optional strategy override
+        ngo_id = request.form.get('ngo_id')
+        project_id = request.form.get('project_id')
+        project_name = request.form.get('project_name')
         strategy = request.form.get('strategy', None)
         
+        if not ngo_id:
+            return jsonify({
+                "error": "NGO ID is required",
+                "message": "Please provide NGO identification"
+            }), 400
+        
         # Process the dataset
-        results = processor.process_dataset(files, strategy)
+        results = processor.process_dataset(files, ngo_id, project_id, project_name, strategy)
         
         return jsonify({
             "status": "success",
@@ -704,9 +737,16 @@ def verify_dataset():
             "dataset_analysis": results['dataset_analysis'],
             "verification_strategy": results['verification_strategy'],
             "verification_results": results['verification_results'],
+            "ngo_id": results['ngo_id'],
+            "project_id": results['project_id'],
+            "project_name": results['project_name'],
+            "potential_carbon_credits": results['potential_carbon_credits'],
+            "verification_status": results['status'],
             "timestamp": results['timestamp'],
             "next_steps": {
-                "can_issue_credits": results['verification_results']['confidence_score'] > 0.6,
+                "awaiting_admin_review": True,
+                "admin_approval_required": results['verification_results']['confidence_score'] > 0.5,
+                "estimated_processing_time": "24-48 hours",
                 "recommended_actions": results['verification_results']['recommendations']
             }
         }), 200
@@ -750,6 +790,181 @@ def get_verification_strategies():
             }
         }
     }), 200
+
+@app.route('/admin/pending', methods=['GET'])
+def get_pending_verifications():
+    """Get all verifications pending admin review"""
+    try:
+        with sqlite3.connect(processor.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT * FROM verifications 
+                WHERE status = 'pending_admin_review'
+                ORDER BY created_at DESC
+            ''')
+            
+            columns = [description[0] for description in cursor.description]
+            pending_verifications = []
+            
+            for row in cursor.fetchall():
+                verification = dict(zip(columns, row))
+                verification['verification_results'] = json.loads(verification['verification_results'])
+                verification['recommendations'] = json.loads(verification['recommendations'])
+                pending_verifications.append(verification)
+        
+        return jsonify({
+            "status": "success",
+            "pending_verifications": pending_verifications,
+            "count": len(pending_verifications)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to retrieve pending verifications",
+            "message": str(e)
+        }), 500
+
+@app.route('/admin/approve', methods=['POST'])
+def approve_verification():
+    """Admin approval of verification - issues carbon credits"""
+    try:
+        data = request.get_json()
+        
+        required_fields = ['verification_id', 'admin_id', 'approved']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({
+                    "error": f"Missing required field: {field}"
+                }), 400
+        
+        verification_id = data['verification_id']
+        admin_id = data['admin_id']
+        approved = data['approved']
+        admin_notes = data.get('admin_notes', '')
+        credits_to_issue = data.get('credits_to_issue', None)
+        
+        # Get the verification record
+        with sqlite3.connect(processor.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM verifications WHERE verification_id = ?', (verification_id,))
+            row = cursor.fetchone()
+            
+            if not row:
+                return jsonify({
+                    "error": "Verification not found"
+                }), 404
+            
+            columns = [description[0] for description in cursor.description]
+            verification = dict(zip(columns, row))
+            
+            if verification['status'] != 'pending_admin_review':
+                return jsonify({
+                    "error": "Verification is not pending review"
+                }), 400
+        
+        new_status = 'approved' if approved else 'rejected'
+        credits_issued = 0
+        
+        if approved:
+            # Calculate credits to issue
+            verification_results = json.loads(verification['verification_results'])
+            if credits_to_issue is not None:
+                credits_issued = credits_to_issue
+            elif 'estimated_carbon_sequestration_kg' in verification_results['metrics']:
+                credits_issued = verification_results['metrics']['estimated_carbon_sequestration_kg'] / 1000
+            elif 'estimated_total_trees' in verification_results['metrics']:
+                credits_issued = (verification_results['metrics']['estimated_total_trees'] * 12.3) / 1000 * verification_results['confidence_score']
+            
+            credits_issued = round(credits_issued, 3)
+        
+        # Update verification status
+        with sqlite3.connect(processor.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE verifications 
+                SET status = ?, admin_notes = ?, admin_reviewed_by = ?, 
+                    admin_reviewed_at = ?, credits_issued = ?
+                WHERE verification_id = ?
+            ''', (new_status, admin_notes, admin_id, datetime.now().isoformat(), 
+                  credits_issued, verification_id))
+            conn.commit()
+        
+        # If approved, integrate with blockchain API to issue credits
+        if approved and credits_issued > 0:
+            try:
+                # Call blockchain API to issue credits
+                import requests
+                blockchain_response = requests.post('http://localhost:5006/ledger/issue', 
+                    json={
+                        'ngo_id': verification['ngo_id'],
+                        'report_id': verification_id,
+                        'amount': credits_issued,
+                        'price_per_credit': 25.0
+                    }, timeout=10)
+                
+                if blockchain_response.status_code != 200:
+                    print(f"Warning: Failed to issue credits on blockchain: {blockchain_response.text}")
+            except Exception as e:
+                print(f"Warning: Could not connect to blockchain API: {e}")
+        
+        return jsonify({
+            "status": "success",
+            "verification_id": verification_id,
+            "action": "approved" if approved else "rejected",
+            "credits_issued": credits_issued,
+            "admin_notes": admin_notes,
+            "reviewed_by": admin_id,
+            "reviewed_at": datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to process admin approval",
+            "message": str(e)
+        }), 500
+
+@app.route('/admin/statistics', methods=['GET'])
+def get_admin_statistics():
+    """Get admin dashboard statistics"""
+    try:
+        with sqlite3.connect(processor.db_path) as conn:
+            cursor = conn.cursor()
+            
+            # Count by status
+            cursor.execute('SELECT status, COUNT(*) FROM verifications GROUP BY status')
+            status_counts = dict(cursor.fetchall())
+            
+            # Total credits issued
+            cursor.execute('SELECT SUM(credits_issued) FROM verifications WHERE status = "approved"')
+            total_credits = cursor.fetchone()[0] or 0
+            
+            # Average confidence score
+            cursor.execute('SELECT AVG(confidence_score) FROM verifications')
+            avg_confidence = cursor.fetchone()[0] or 0
+            
+            # Recent activity (last 7 days)
+            cursor.execute('''
+                SELECT COUNT(*) FROM verifications 
+                WHERE created_at >= datetime('now', '-7 days')
+            ''')
+            recent_submissions = cursor.fetchone()[0] or 0
+        
+        return jsonify({
+            "status": "success",
+            "statistics": {
+                "status_breakdown": status_counts,
+                "total_credits_issued": round(total_credits, 2),
+                "average_confidence_score": round(avg_confidence, 3),
+                "recent_submissions_7days": recent_submissions,
+                "pending_review_count": status_counts.get('pending_admin_review', 0)
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to get admin statistics",
+            "message": str(e)
+        }), 500
 
 @app.route('/dataset/history', methods=['GET'])
 def get_verification_history():

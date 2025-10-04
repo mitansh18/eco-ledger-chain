@@ -146,6 +146,24 @@ python generate_test_data.py
 
 ## 📋 API Endpoints
 
+### Dynamic Dataset Processing APIs
+
+| Service | Endpoint | Method | Description |
+|---------|----------|---------|-------------|
+| Dataset Analysis | `/dataset/analyze` | POST | Analyze uploaded files and recommend strategy |
+| Dataset Verification | `/dataset/verify` | POST | Process dataset with NGO info for admin review |
+| Verification Strategies | `/dataset/strategies` | GET | Get available verification strategies |
+| Verification History | `/dataset/history` | GET | Get verification history |
+| Verification Result | `/dataset/result/{id}` | GET | Get detailed verification result |
+
+### Admin Approval APIs
+
+| Endpoint | Method | Description |
+|----------|---------|-------------|
+| `/admin/pending` | GET | Get verifications pending admin review |
+| `/admin/approve` | POST | Approve or reject verification (issues credits) |
+| `/admin/statistics` | GET | Get admin dashboard statistics |
+
 ### Core Verification APIs
 
 | Service | Endpoint | Method | Description |
@@ -202,19 +220,60 @@ Where:
 - Minimum Final_Score of 0.6 required for carbon credit eligibility
 ```
 
-## 🎯 Usage Workflows
+## 🎯 Complete Verification Workflow
+
+### 🔄 **Full Admin Approval Process**
+
+**EcoLedger follows a comprehensive 6-step verification workflow:**
+
+#### **Step 1: NGO Data Upload** 🌱
+- NGO uploads any environmental dataset (images, CSV, JSON, etc.)
+- Provides NGO ID, project information, and project details
+- System accepts any file format and automatically analyzes content
+
+#### **Step 2: AI Verification** 🤖
+- AI intelligently detects dataset type and selects optimal verification strategy
+- Runs appropriate models: tree detection, NDVI analysis, IoT processing, etc.
+- Calculates confidence scores and identifies potential issues
+- Status: `pending_admin_review`
+
+#### **Step 3: Admin Review & Approval** 👨‍💼
+- Admin receives verification in pending queue with AI analysis
+- Reviews confidence scores, metrics, and potential issues
+- Can approve, reject, or adjust carbon credit amounts
+- Adds admin notes and approval decision
+
+#### **Step 4: Carbon Credits Issuance** 💰
+- Upon approval, carbon credits automatically issued to NGO
+- Credits stored immutably on blockchain ledger
+- NGO receives notification of successful credit issuance
+- Status: `approved` 
+
+#### **Step 5: Dashboard Visibility** 📊
+- Verified projects appear in public verification dashboard
+- Shows transparency data: scores, metrics, blockchain hashes
+- Real-time statistics and verification trends
+- Companies can view project details and verification quality
+
+#### **Step 6: Marketplace Trading** 🛒
+- Approved carbon credits become available in marketplace
+- Companies can browse, filter, and purchase verified credits
+- Blockchain automatically handles credit transfer transactions
+- NGOs receive payment for environmental impact
+
+---
 
 ### 🧠 Dynamic Dataset Verification (Universal)
 
 1. **Upload Any Environmental Dataset**
-   - Drag and drop files of any type: images, CSV, Excel, JSON, GeoJSON, ZIP archives
+   - Drag and drop files: images, CSV, Excel, JSON, GeoJSON, ZIP archives
+   - Provide NGO ID and project information
    - System automatically analyzes file content and structure
-   - Identifies dataset type: tree images, sensor data, satellite imagery, etc.
 
 2. **Intelligent Strategy Selection**
    - AI analyzes filenames, content, and data patterns
    - Recommends optimal verification strategy automatically
-   - Options to override with manual strategy selection
+   - Supports override with manual strategy selection
    - Confidence scoring for strategy recommendation
 
 3. **Adaptive Verification Process**
@@ -223,11 +282,16 @@ Where:
    - Generates verification metrics relevant to dataset type
    - Provides confidence scores and quality assessments
 
-4. **Smart Results & Recommendations**
-   - Issues carbon credits based on adaptive scoring thresholds
-   - Provides actionable recommendations for data improvement
-   - Identifies missing data types and quality issues
-   - Suggests next steps for credit eligibility
+4. **Admin Review Process**
+   - All verifications require admin approval before credit issuance
+   - Admin reviews AI confidence, metrics, and potential issues
+   - Can approve, reject, or modify credit amounts
+   - Ensures quality control and fraud prevention
+
+5. **Credit Issuance & Trading**
+   - Upon approval, credits automatically issued and recorded on blockchain
+   - Credits become available for company purchase in marketplace
+   - Full traceability from initial verification to final transaction
 
 ### 🌱 Traditional Mangrove Verification (Structured)
 
