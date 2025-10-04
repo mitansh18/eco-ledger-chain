@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # AI Services
+  yolov8-api:
+    build: ./backend/yolov8_api
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/yolov8_api/uploads:/app/uploads
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  ndvi-api:
+    build: ./backend/ndvi_api
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./backend/ndvi_api/uploads:/app/uploads
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  iot-api:
+    build: ./backend/iot_api
+    ports:
+      - "5003:5003"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  co2-api:
+    build: ./backend/co2_api
+    ports:
+      - "5004:5004"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  finalscore-api:
+    build: ./backend/finalscore_api
+    ports:
+      - "5005:5005"
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  # Blockchain Ledger Service
+  ledger-service:
+    build: ./backend/ledger_service
+    ports:
+      - "5006:5006"
+    volumes:
+      - ./backend/ledger_service/data:/app/data
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+  # Frontend
+  ecoledger-frontend:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - yolov8-api
+      - ndvi-api
+      - iot-api
+      - co2-api
+      - finalscore-api
+      - ledger-service
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+networks:
+  default:
+    name: ecoledger-network
+
+volumes:
+  ledger-data:

@@ -1,0 +1,718 @@
+{
+  "info": {
+    "name": "EcoLedger - Carbon Credit Verification APIs",
+    "description": "Complete API collection for testing the EcoLedger mangrove plantation verification and carbon credit system",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. YOLOv8 Tree Detection API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{yolov8_base_url}}/health",
+              "host": ["{{yolov8_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Demo Tree Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{yolov8_base_url}}/demo",
+              "host": ["{{yolov8_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Count Trees in Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Upload drone/satellite image for tree detection"
+                },
+                {
+                  "key": "claimed_trees",
+                  "value": "50",
+                  "type": "text",
+                  "description": "Number of trees claimed to be planted"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{yolov8_base_url}}/treecount",
+              "host": ["{{yolov8_base_url}}"],
+              "path": ["treecount"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. NDVI Vegetation Health API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ndvi_base_url}}/health",
+              "host": ["{{ndvi_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Demo NDVI Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ndvi_base_url}}/demo",
+              "host": ["{{ndvi_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Calculate NDVI from Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "description": "Upload multispectral satellite/drone image"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{ndvi_base_url}}/ndvi",
+              "host": ["{{ndvi_base_url}}"],
+              "path": ["ndvi"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. IoT Environmental Data API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_base_url}}/health",
+              "host": ["{{iot_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Demo IoT Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_base_url}}/demo",
+              "host": ["{{iot_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Generate Synthetic IoT Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_base_url}}/generate?count=10",
+              "host": ["{{iot_base_url}}"],
+              "path": ["generate"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10",
+                  "description": "Number of IoT readings to generate"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analyze IoT Data (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"soil_moisture\": 75.5,\n  \"temperature\": 28.2,\n  \"salinity\": 22.1,\n  \"ph\": 7.3,\n  \"dissolved_oxygen\": 6.8,\n  \"conductivity\": 32.4\n}"
+            },
+            "url": {
+              "raw": "{{iot_base_url}}/iot",
+              "host": ["{{iot_base_url}}"],
+              "path": ["iot"]
+            }
+          }
+        },
+        {
+          "name": "Analyze IoT Data (CSV)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Upload CSV file with IoT sensor data"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{iot_base_url}}/iot",
+              "host": ["{{iot_base_url}}"],
+              "path": ["iot"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. CO₂ Absorption Calculator API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{co2_base_url}}/health",
+              "host": ["{{co2_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Demo CO₂ Calculation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{co2_base_url}}/demo",
+              "host": ["{{co2_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Calculate CO₂ Absorption",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": 45,\n  \"species\": \"mixed_species\",\n  \"age_years\": 8,\n  \"environmental_factors\": {\n    \"soil_quality\": \"excellent\",\n    \"water_salinity\": \"optimal\",\n    \"climate_zone\": \"tropical\",\n    \"tree_density\": \"normal\"\n  },\n  \"include_uncertainty\": true\n}"
+            },
+            "url": {
+              "raw": "{{co2_base_url}}/co2",
+              "host": ["{{co2_base_url}}"],
+              "path": ["co2"]
+            }
+          }
+        },
+        {
+          "name": "Get Species Information",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{co2_base_url}}/species",
+              "host": ["{{co2_base_url}}"],
+              "path": ["species"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Final Score & Carbon Credits API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{finalscore_base_url}}/health",
+              "host": ["{{finalscore_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Demo Final Score Calculation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{finalscore_base_url}}/demo",
+              "host": ["{{finalscore_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Calculate Final Score",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": 45,\n  \"Claimed_Trees\": 50,\n  \"NDVI_Score\": 0.742,\n  \"IoT_Score\": 0.658,\n  \"Audit_Check\": 0.85,\n  \"CO2_absorbed_kg\": 553.5,\n  \"risk_factors\": {\n    \"climate_risk\": \"low\",\n    \"political_stability\": \"stable\",\n    \"project_management\": \"good\",\n    \"community_engagement\": \"high\"\n  },\n  \"market_type\": \"voluntary_market\"\n}"
+            },
+            "url": {
+              "raw": "{{finalscore_base_url}}/finalscore",
+              "host": ["{{finalscore_base_url}}"],
+              "path": ["finalscore"]
+            }
+          }
+        },
+        {
+          "name": "Get Scoring Weights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{finalscore_base_url}}/weights",
+              "host": ["{{finalscore_base_url}}"],
+              "path": ["weights"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Blockchain Ledger Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ledger_base_url}}/health",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Get Blockchain Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/blockchain",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "blockchain"]
+            }
+          }
+        },
+        {
+          "name": "Submit Verification Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"ngo-123\",\n  \"project_id\": \"PRJ-2024-001\",\n  \"verification_data\": {\n    \"project_name\": \"Sundarbans Restoration Phase 1\",\n    \"location\": \"Sundarbans, Bangladesh\",\n    \"coordinates\": {\"lat\": 21.9497, \"lng\": 89.1833},\n    \"claimed_trees\": 50,\n    \"tree_count\": 45,\n    \"ndvi_score\": 0.742,\n    \"iot_score\": 0.658,\n    \"co2_absorbed\": 553.5,\n    \"final_score\": 0.756,\n    \"carbon_credits\": 0.418,\n    \"grade\": \"B+\",\n    \"timestamp\": \"2024-01-15T10:30:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/submit",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Query Verification Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/query?project_id=PRJ-2024-001",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "query"],
+              "query": [
+                {
+                  "key": "project_id",
+                  "value": "PRJ-2024-001",
+                  "description": "Project ID to search for"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Issue Carbon Credits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"ngo-123\",\n  \"project_id\": \"PRJ-2024-001\",\n  \"credits_amount\": 0.418,\n  \"verification_score\": 0.756,\n  \"co2_absorbed\": 553.5,\n  \"tree_count\": 45,\n  \"project_location\": \"Sundarbans, Bangladesh\",\n  \"price_per_credit\": 15.50\n}"
+            },
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/issue",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "issue"]
+            }
+          }
+        },
+        {
+          "name": "List Available Carbon Credits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/credits?status=active&limit=10",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "credits"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by credit status"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Maximum number of results"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transfer Carbon Credits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credit_id\": \"ECC-PRJ-2024-001-a1b2c3d4\",\n  \"from_owner\": \"ngo-123\",\n  \"to_owner\": \"buyer-456\",\n  \"credits_amount\": 0.2,\n  \"transfer_price\": 15.50\n}"
+            },
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/transfer",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "transfer"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Complete End-to-End Workflow",
+      "item": [
+        {
+          "name": "Step 1: Tree Detection",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Tree detection successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('Tree_Count');",
+                  "    pm.globals.set('tree_count', jsonData.Tree_Count);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{yolov8_base_url}}/demo",
+              "host": ["{{yolov8_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Step 2: NDVI Analysis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NDVI analysis successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('NDVI_Score');",
+                  "    pm.globals.set('ndvi_score', jsonData.NDVI_Score);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{ndvi_base_url}}/demo",
+              "host": ["{{ndvi_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Step 3: IoT Analysis",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"IoT analysis successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('IoT_Score');",
+                  "    pm.globals.set('iot_score', jsonData.IoT_Score);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{iot_base_url}}/demo",
+              "host": ["{{iot_base_url}}"],
+              "path": ["demo"]
+            }
+          }
+        },
+        {
+          "name": "Step 4: CO₂ Calculation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"CO₂ calculation successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('CO2_absorbed_kg');",
+                  "    pm.globals.set('co2_absorbed', jsonData.CO2_absorbed_kg);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": {{tree_count}}\n}"
+            },
+            "url": {
+              "raw": "{{co2_base_url}}/co2",
+              "host": ["{{co2_base_url}}"],
+              "path": ["co2"]
+            }
+          }
+        },
+        {
+          "name": "Step 5: Final Score Calculation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Final score calculation successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('Final_Score');",
+                  "    pm.expect(jsonData).to.have.property('Carbon_Credits');",
+                  "    pm.globals.set('final_score', jsonData.Final_Score);",
+                  "    pm.globals.set('carbon_credits', jsonData.Carbon_Credits);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Tree_Count\": {{tree_count}},\n  \"Claimed_Trees\": 50,\n  \"NDVI_Score\": {{ndvi_score}},\n  \"IoT_Score\": {{iot_score}},\n  \"Audit_Check\": 0.85,\n  \"CO2_absorbed_kg\": {{co2_absorbed}}\n}"
+            },
+            "url": {
+              "raw": "{{finalscore_base_url}}/finalscore",
+              "host": ["{{finalscore_base_url}}"],
+              "path": ["finalscore"]
+            }
+          }
+        },
+        {
+          "name": "Step 6: Submit to Blockchain",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Blockchain submission successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.submitted).to.be.true;",
+                  "    pm.expect(jsonData).to.have.property('tx_hash');",
+                  "    pm.globals.set('tx_hash', jsonData.tx_hash);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"test-ngo-{{$randomInt}}\",\n  \"project_id\": \"PRJ-TEST-{{$randomInt}}\",\n  \"verification_data\": {\n    \"project_name\": \"Test Mangrove Project\",\n    \"location\": \"Test Location\",\n    \"claimed_trees\": 50,\n    \"tree_count\": {{tree_count}},\n    \"ndvi_score\": {{ndvi_score}},\n    \"iot_score\": {{iot_score}},\n    \"co2_absorbed\": {{co2_absorbed}},\n    \"final_score\": {{final_score}},\n    \"carbon_credits\": {{carbon_credits}}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/submit",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "submit"]
+            }
+          }
+        },
+        {
+          "name": "Step 7: Issue Carbon Credits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngo_id\": \"test-ngo-{{$randomInt}}\",\n  \"project_id\": \"PRJ-TEST-{{$randomInt}}\",\n  \"credits_amount\": {{carbon_credits}},\n  \"verification_score\": {{final_score}},\n  \"co2_absorbed\": {{co2_absorbed}},\n  \"tree_count\": {{tree_count}},\n  \"project_location\": \"Test Location\"\n}"
+            },
+            "url": {
+              "raw": "{{ledger_base_url}}/ledger/issue",
+              "host": ["{{ledger_base_url}}"],
+              "path": ["ledger", "issue"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "yolov8_base_url",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "ndvi_base_url",
+      "value": "http://localhost:5002",
+      "type": "string"
+    },
+    {
+      "key": "iot_base_url",
+      "value": "http://localhost:5003",
+      "type": "string"
+    },
+    {
+      "key": "co2_base_url",
+      "value": "http://localhost:5004",
+      "type": "string"
+    },
+    {
+      "key": "finalscore_base_url",
+      "value": "http://localhost:5005",
+      "type": "string"
+    },
+    {
+      "key": "ledger_base_url",
+      "value": "http://localhost:5006",
+      "type": "string"
+    }
+  ]
+}
