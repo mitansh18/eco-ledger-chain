@@ -10,24 +10,29 @@ import {
   Database,
   Menu,
   X,
-  TreePine
+  TreePine,
+  FileText
 } from 'lucide-react'
 import UploadPage from '@/components/UploadPage'
+import DynamicUploadPage from '@/components/DynamicUploadPage'
 import Dashboard from '@/components/Dashboard'
 import Marketplace from '@/components/Marketplace'
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('upload')
+  const [activeTab, setActiveTab] = useState('dynamic')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const tabs = [
-    { id: 'upload', name: 'Upload & Verify', icon: Upload, description: 'Submit mangrove data for AI verification' },
+    { id: 'dynamic', name: 'Smart Dataset Upload', icon: Upload, description: 'Upload any dataset for intelligent verification' },
+    { id: 'upload', name: 'Standard Upload', icon: FileText, description: 'Traditional mangrove project submission' },
     { id: 'dashboard', name: 'Verification Dashboard', icon: BarChart3, description: 'View verification results and scores' },
     { id: 'marketplace', name: 'Carbon Credits Marketplace', icon: ShoppingCart, description: 'Trade verified carbon credits' },
   ]
 
   const renderActiveComponent = () => {
     switch (activeTab) {
+      case 'dynamic':
+        return <DynamicUploadPage />
       case 'upload':
         return <UploadPage />
       case 'dashboard':
@@ -35,7 +40,7 @@ export default function Home() {
       case 'marketplace':
         return <Marketplace />
       default:
-        return <UploadPage />
+        return <DynamicUploadPage />
     }
   }
 
@@ -124,24 +129,28 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-4xl font-bold mb-4">
-              AI-Powered Mangrove Verification
+              AI-Powered Dynamic Dataset Verification
             </h2>
             <p className="text-xl text-primary-100 mb-6 max-w-3xl mx-auto">
-              Leverage YOLOv8 tree detection, NDVI vegetation analysis, and IoT sensors 
-              to verify mangrove plantations and issue verified carbon credits on the blockchain.
+              Upload ANY environmental dataset and let our intelligent AI system automatically detect, 
+              analyze, and verify it using the most appropriate strategy - from tree detection to carbon estimation.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <div className="flex items-center space-x-2 bg-primary-500 bg-opacity-50 px-3 py-1 rounded-full">
                 <TreePine className="w-4 h-4" />
-                <span>Tree Detection AI</span>
+                <span>Smart Detection</span>
               </div>
               <div className="flex items-center space-x-2 bg-primary-500 bg-opacity-50 px-3 py-1 rounded-full">
                 <Leaf className="w-4 h-4" />
-                <span>NDVI Analysis</span>
+                <span>Dynamic Analysis</span>
               </div>
               <div className="flex items-center space-x-2 bg-primary-500 bg-opacity-50 px-3 py-1 rounded-full">
                 <Database className="w-4 h-4" />
-                <span>Blockchain Ledger</span>
+                <span>Any Dataset Type</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-primary-500 bg-opacity-50 px-3 py-1 rounded-full">
+                <FileText className="w-4 h-4" />
+                <span>Intelligent Verification</span>
               </div>
             </div>
           </div>
